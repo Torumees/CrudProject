@@ -1,10 +1,13 @@
+// frontend/src/App.tsx
+
 import React, { useEffect, useState } from "react";
-import { getUsers, createUser, deleteUser, User } from "./api/userApi";
+import { getUsers, createUser, deleteUser, updateUser, User } from "./api/userApi";
 
 function App() {
   const [users, setUsers] = useState<User[]>([]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [editingUser, setEditingUser] = useState<User | null>(null); // <-- kas oleme "edit mode'is"?
 
   async function loadUsers() {
     const data = await getUsers();
@@ -18,20 +21,40 @@ function App() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if(!name.trim() || !email.trim()) {
-      alert("Name ja email peavad olema täidetud");
+    if (!name.trim() || !email.trim()) {
+      alert("Nimi ja email peavad olema täidetud");
       return;
     }
 
-    await createUser({ name, email });
+    if (editingUser) {
+      // UPDATE
+      await updateUser(editingUser.id, { name, email });
+      setEditingUser(null); // väljumine edit-mode'ist
+    } else {
+      // CREATE
+      await createUser({ name, email });
+    }
+
     await loadUsers();
     setName("");
     setEmail("");
   }
 
-  async function handleDelete(id:number) {
+  async function handleDelete(id: number) {
     await deleteUser(id);
     await loadUsers();
+  }
+
+  function handleEdit(user: User) {
+    setEditingUser(user);
+    setName(user.name);
+    setEmail(user.email);
+  }
+
+  function handleCancelEdit() {
+    setEditingUser(null);
+    setName("");
+    setEmail("");
   }
 
   return (
@@ -51,13 +74,21 @@ function App() {
           onChange={e => setEmail(e.target.value)}
           style={{ marginRight: "0.5rem" }}
         />
-        <button type="submit">Add user</button>
+        <button type="submit">
+          {editingUser ? "Update user" : "Add user"}
+        </button>
+        {editingUser && (
+          <button type="button" onClick={handleCancelEdit} style={{ marginLeft: "0.5rem" }}>
+            Cancel
+          </button>
+        )}
       </form>
 
       <ul>
-        {users.map((u, i) => (
-          <li key={i}>
-            {u.name} — {u.email}
+        {users.map(u => (
+          <li key={u.id}>
+            {u.name} — {u.email}{" "}
+            <button onClick={() => handleEdit(u)}>Edit</button>{" "}
             <button onClick={() => handleDelete(u.id)}>Delete</button>
           </li>
         ))}

@@ -35,4 +35,15 @@ public class UserService {
         log.info("Deleting user with id: {}", id);
         repository.deleteById(id);
     }
+
+    public User updateUser(Long id, User updated) {
+        User existing = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id" + id));
+        
+        existing.setName(updated.getName());
+        existing.setEmail(updated.getEmail());
+
+        log.info("Updated user: {}", existing);
+        return existing;
+    }
 }

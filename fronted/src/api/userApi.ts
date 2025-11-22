@@ -25,3 +25,12 @@ export async function deleteUser(id:number): Promise<void> {
         method: "DELETE",
     });
 }
+
+export async function updateUser(id:number, user: Omit<User, "id">): Promise<User> {
+    const res = await fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(user),
+    });
+    return res.json();
+}
