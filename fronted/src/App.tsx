@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getUsers, createUser, User } from "./api/userApi";
+import { getUsers, createUser, deleteUser, User } from "./api/userApi";
 
 function App() {
   const [users, setUsers] = useState<User[]>([]);
@@ -19,7 +19,7 @@ function App() {
     e.preventDefault();
 
     if(!name.trim() || !email.trim()) {
-      alert("Name ja email peavad olema taidetud");
+      alert("Name ja email peavad olema täidetud");
       return;
     }
 
@@ -27,6 +27,11 @@ function App() {
     await loadUsers();
     setName("");
     setEmail("");
+  }
+
+  async function handleDelete(id:number) {
+    await deleteUser(id);
+    await loadUsers();
   }
 
   return (
@@ -53,6 +58,7 @@ function App() {
         {users.map((u, i) => (
           <li key={i}>
             {u.name} — {u.email}
+            <button onClick={() => handleDelete(u.id)}>Delete</button>
           </li>
         ))}
       </ul>

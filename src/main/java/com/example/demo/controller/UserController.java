@@ -26,8 +26,14 @@ public class UserController {
     }
 
     @PostMapping
-    public void createUser(@RequestBody User user) {
+    public User createUser(@RequestBody User user) {
         log.info("POST /users called with user: {}", user);
-        service.addUser(user);
+        return service.addUser(user);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable Long id) {
+        log.info("DELETE /users/{} called", id);
+        service.deleteUser(id);
     }
 }

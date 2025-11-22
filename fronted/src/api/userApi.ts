@@ -1,4 +1,5 @@
 export interface User {
+    id: number;
     name: string;
     email: string;
 }
@@ -10,10 +11,17 @@ export async function getUsers(): Promise<User[]> {
     return res.json();
 }
 
-export async function createUser(user:User): Promise<void> {
-    await fetch(API_URL, {
+export async function createUser(user: Omit<User, "id">): Promise<User> {
+    const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json"},
         body: JSON.stringify(user),
+    });
+    return res.json();
+}
+
+export async function deleteUser(id:number): Promise<void> {
+    await fetch(`${API_URL}/${id}`, {
+        method: "DELETE",
     });
 }

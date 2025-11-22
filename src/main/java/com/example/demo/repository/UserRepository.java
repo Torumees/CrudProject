@@ -14,7 +14,12 @@ public class UserRepository {
         return users;
     }
 
-    public void save(User user) {
+    public User save(User user) {
         users.add(user);
+        return user;
+    }
+
+    public void deleteById(Long id) {
+        users.removeIf(u -> u.getId().equals(id));
     }
 }
