@@ -17,8 +17,6 @@ public class UserService {
     @Autowired
     private UserRepository repository;
 
-    private long nextId = 1;
-
     public List<User> getAllUsers() {
         List<User> users = repository.findAll();
         log.info("Returning {} users: {}", users.size(), users);
@@ -26,9 +24,9 @@ public class UserService {
     }
 
     public User addUser(User user) {
-        user.setId(nextId++);
-        log.info("Saving user in service: {}", user);
-        return repository.save(user);
+        User saved = repository.save(user);
+        log.info("Saving user in service: {}", saved);
+        return saved;
     }
 
     public void deleteUser(Long id) {
@@ -43,7 +41,8 @@ public class UserService {
         existing.setName(updated.getName());
         existing.setEmail(updated.getEmail());
 
+        User saved = repository.save(existing);
         log.info("Updated user: {}", existing);
-        return existing;
+        return saved;
     }
 }
