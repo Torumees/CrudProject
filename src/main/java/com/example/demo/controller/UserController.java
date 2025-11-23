@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,9 +24,12 @@ public class UserController {
     private UserService service;
 
     @GetMapping
-    public List<User> getAllUsers() {
-        log.info("GET /users called");
-        return service.getAllUsers();
+    public Page<User> getUsers(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        log.info("GET /users?page={}&size{} called", page, size);
+        return service.getUsers(page, size);
     }
 
     @PostMapping

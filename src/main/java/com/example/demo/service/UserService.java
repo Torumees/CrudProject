@@ -5,6 +5,9 @@ import com.example.demo.repository.UserRepository;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,5 +47,13 @@ public class UserService {
         User saved = repository.save(existing);
         log.info("Updated user: {}", existing);
         return saved;
+    }
+
+    public Page<User> getUsers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> result = repository.findAll(pageable);
+        log.info("Returning page {} of size {} (total elements: {})",
+            result.getNumber(), result.getSize(), result.getTotalElements());
+        return result;
     }
 }

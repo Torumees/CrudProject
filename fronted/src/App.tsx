@@ -1,21 +1,32 @@
 // frontend/src/App.tsx
 
 import React, { useEffect, useState } from "react";
-import { getUsers, createUser, deleteUser, updateUser, User } from "./api/userApi";
+import { getUsers, createUser, deleteUser, updateUser, User, PageResponse } from "./api/userApi";
 
 function App() {
   const [users, setUsers] = useState<User[]>([]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [editingUser, setEditingUser] = useState<User | null>(null); // <-- kas oleme "edit mode'is"?
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
-  async function loadUsers() {
-    const data = await getUsers();
-    setUsers(data);
+  const pageSize = 5;
+
+  async function loadUsers(targetPage: number) {
+    try {
+      const data: PageResponse<User> = await getUsers(targetPage, pageSize);
+      setUsers(data.content);
+      setPage(data.number);
+      setTotalPages(data.totalPages);
+    } catch (e) {
+      console.error(e);
+      alert("Kasutajate laadimine ebaõnnestus");
+    }
   }
 
   useEffect(() => {
-    loadUsers();
+    loadUsers(0);
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -29,20 +40,20 @@ function App() {
     if (editingUser) {
       // UPDATE
       await updateUser(editingUser.id, { name, email });
-      setEditingUser(null); // väljumine edit-mode'ist
+      setEditingUser(null);
     } else {
       // CREATE
       await createUser({ name, email });
     }
 
-    await loadUsers();
+    await loadUsers(0);
     setName("");
     setEmail("");
   }
 
   async function handleDelete(id: number) {
     await deleteUser(id);
-    await loadUsers();
+    await loadUsers(0);
   }
 
   function handleEdit(user: User) {
@@ -55,6 +66,18 @@ function App() {
     setEditingUser(null);
     setName("");
     setEmail("");
+  }
+
+  function handleNext() {
+    if (page < totalPages - 1) {
+      loadUsers(page + 1);
+    }
+  }
+
+  function handlePrev() {
+    if (page > 0) {
+      loadUsers(page - 1);
+    }
   }
 
   return (
@@ -93,6 +116,18 @@ function App() {
           </li>
         ))}
       </ul>
+
+      <div style={{ marginTop: "1rem" }}>
+        <button onClick={handlePrev} disabled={page === 0}>
+          Previous
+        </button>
+        <span style={{ margin: "0 0.5rem" }}>
+          Page {page + 1} / {totalPages || 1}
+        </span>
+        <button onClick={handleNext} disabled={page >= totalPages - 1}>
+          Next
+        </button>
+      </div>
     </div>
   );
 }
